@@ -67,5 +67,5 @@ $hex = [System.String]::Format('{0:X}', $autoMap) #map returns a int, so convert
 
 Start-Sleep -s 10
 
-} While(0)
+} While(1)
 
