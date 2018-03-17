@@ -63,7 +63,11 @@ if ($temp -ge $dangerTemp){
 $autoMap = [int](map $temp $lowerTempLimit $upperTempLimit $lowerRpmLimit $upperRpmLimit) #convert our temp into a fan rpm value based on our set params
 $hex = [System.String]::Format('{0:X}', $autoMap) #map returns a int, so convert to hex value to pass to the raw command
 
+if($autoMap -le 15){
+($start +" "+ ($setSpeed+"0"+$hex)) | Invoke-Expression
+}else{
 ($start +" "+ ($setSpeed+$hex)) | Invoke-Expression
+}
 
 Start-Sleep -s 10
 
