@@ -4,7 +4,6 @@ $dracUser = "root"
 $dracPass = "calvin"
 $ipmiToolDir = "C:\Program Files (x86)\Dell\SysMgt\bmc"
 
-#these are your temp ranges, the lower temp will yield the lowest rpm, and you get the rest
 $lowerTempLimit = [int]25
 $upperTempLimit = [int]30
 $dangerTemp = [int]31 #server goes back to auto if this temp is reached
@@ -30,14 +29,14 @@ function get-Temp()
 $command = './ipmitool.exe -I lanplus -H ' +$dracIP+ ' -U ' +$dracUser+ ' -P ' +$dracPass+ ' sensor reading "Ambient Temp"'
 $stringtemp = Invoke-Expression -Command $command
 $stringtemp = [String]$stringtemp
-return [int]$stringtemp.Substring(19)
+return [int]$stringtemp.Substring($stringtemp.IndexOf("|")+2)
 }
 
 function get-FanRpm()
 {
 $command = './ipmitool.exe -I lanplus -H ' +$dracIP+' -U '+$dracUser+' -P '+$dracPass+' sensor reading "FAN 3 RPM"'
 $stringtemp = Invoke-Expression -Command $command
-return [int]$stringtemp.Substring(19)
+return [int]$stringtemp.Substring($stringtemp.IndexOf("|")+1)
 }
 
 function map([int]$in, [int]$in_min, [int]$in_max, [int]$out_min, [int]$out_max) #modified arduino's map function. Yay open source (https://www.arduino.cc/reference/en/language/functions/math/map/)
