@@ -8,7 +8,7 @@ $lowerTempLimit = [int]25
 $upperTempLimit = [int]30
 $dangerTemp = [int]31 #server goes back to auto if this temp is reached
 $lowerRpmLimit = [int]4
-$upperRpmLimit = [int]10
+$upperRpmLimit = [int]12
 #1 is around ~1000rpm, where 50 is full tilt 6600rpm
 #stop changing here
 
@@ -41,7 +41,7 @@ return [int]$stringtemp.Substring($stringtemp.IndexOf("|")+1)
 
 function map([int]$in, [int]$in_min, [int]$in_max, [int]$out_min, [int]$out_max) #modified arduino's map function. Yay open source (https://www.arduino.cc/reference/en/language/functions/math/map/)
 {
-   return ($x - $in_min) * ($out_max - $out_min + 1) / ($in_max - $in_min + 1) + $out_min
+  return ($in - $in_min) * ($out_max - $out_min) / ($in_max - $in_min) + $out_min
 }
 
 do-Setup
@@ -60,12 +60,12 @@ if ($temp -ge $dangerTemp){
     ($start +" "+ $setManual) | Invoke-Expression
 }
 
-$autoMap = [int](map $temp $lowerTempLimit $lowerRpmLimit $upperTempLimit $upperRpmLimit) #convert our temp into a fan rpm value based on our set params
+$autoMap = [int](map $temp $lowerTempLimit $upperTempLimit $lowerRpmLimit $upperRpmLimit) #convert our temp into a fan rpm value based on our set params
 $hex = [System.String]::Format('{0:X}', $autoMap) #map returns a int, so convert to hex value to pass to the raw command
 
 ($start +" "+ ($setSpeed+$hex)) | Invoke-Expression
 
 Start-Sleep -s 10
 
-} While(1)
+} While(0)
 
