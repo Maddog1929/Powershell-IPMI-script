@@ -1,6 +1,6 @@
 
 
-#Powershell script for R710 auto fan control. By Chad Vega.
+#Powershell script for R710 auto fan control.
  
  #change these
 $dracIP = "192.168.0.125"
