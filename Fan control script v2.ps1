@@ -1,4 +1,6 @@
-﻿#change these
+#﻿Powershell script for R710 auto fan control. By Chad Vega.
+ 
+ #change these
 $dracIP = "192.168.0.125"
 $dracUser = "root"
 $dracPass = "calvin"
