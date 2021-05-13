@@ -9,8 +9,8 @@ $ipmiToolDir = "C:\Program Files (x86)\Dell\SysMgt\bmc"
 
 $dangerTemp = [int]65     # server goes back to auto if this temp is reached
 [int]$percentFan = 50
-[int]$hysteresis = 2
-[int]$tempTarget = 40
+[int]$hysteresis = 3
+[int]$tempTarget = 41
 
 $setManual = [String]("0x30 0x30 0x01 0x00")
 $setAuto = [String]("0x30 0x30 0x01 0x01")
