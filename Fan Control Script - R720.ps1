@@ -1,5 +1,3 @@
-
-
 #Powershell script for R720 auto fan control.
  
  #change these
@@ -8,13 +6,11 @@ $dracUser = "root"
 $dracPass = "password"
 $ipmiToolDir = "C:\Program Files (x86)\Dell\SysMgt\bmc"
 
-$lowerTempLimit = [int]25
-$upperTempLimit = [int]30
-$dangerTemp = [int]31 #server goes back to auto if this temp is reached
-$lowerRpmLimit = [int]4
-$upperRpmLimit = [int]12
-#1 is around ~1000rpm, where 50 is full tilt 6600rpm
-#stop changing here
+
+$dangerTemp = [int]65     # server goes back to auto if this temp is reached
+[int]$percentFan = 50
+[int]$hysteresis = 2
+[int]$tempTarget = 40
 
 $setManual = [String]("0x30 0x30 0x01 0x00")
 $setAuto = [String]("0x30 0x30 0x01 0x01")
@@ -43,19 +39,19 @@ $stringtemp = Invoke-Expression -Command $command
 return [int]$stringtemp.Substring($stringtemp.IndexOf("|")+1)
 }
 
-function map([int]$in, [int]$in_min, [int]$in_max, [int]$out_min, [int]$out_max) #modified arduino's map function. Yay open source (https://www.arduino.cc/reference/en/language/functions/math/map/)
-{
-  return ($in - $in_min) * ($out_max - $out_min) / ($in_max - $in_min) + $out_min
-}
-
 do-Setup
+[int]$temp = get-Temp
+[int]$rpm = get-FanRpm
+
 
 #begin loop
 Do{
-[int]$temp = get-Temp
-[int]$rpm = get-FanRpm
+  $temp = get-Temp
+  $rpm = get-FanRpm
+
 Write-Host "The temp is" $temp"c"
 Write-Host "Current fan rpm is" $rpm
+
 
 if ($temp -ge $dangerTemp){
     ($start +" "+ $setAuto) | Invoke-Expression
@@ -64,16 +60,24 @@ if ($temp -ge $dangerTemp){
     ($start +" "+ $setManual) | Invoke-Expression
 }
 
-$autoMap = [int](map $temp $lowerTempLimit $upperTempLimit $lowerRpmLimit $upperRpmLimit) #convert our temp into a fan rpm value based on our set params
-$hex = [System.String]::Format('{0:X}', $autoMap) #map returns a int, so convert to hex value to pass to the raw command
+if($temp -gt ($tempTarget + $hysteresis) -and $percentFan -lt 100){
+  Write-Host "Temps are high"
+  $percentFan++
+}elseif ($temp -lt ($tempTarget )) {
+  Write-Host "Temps are low"
+  $percentFan--
+}
 
-if($autoMap -le 15){
+$hex = [System.String]::Format('{0:X}', $percentFan) #map returns a int, so convert to hex value to pass to the raw command
+Write-Host "PWM is set to $hex"
+
+if($percentFan -le 15){
 ($start +" "+ ($setSpeed+"0"+$hex)) | Invoke-Expression
 }else{
 ($start +" "+ ($setSpeed+$hex)) | Invoke-Expression
 }
 
-Start-Sleep -s 10
+Start-Sleep -s 1
 
 } While(1)
 
